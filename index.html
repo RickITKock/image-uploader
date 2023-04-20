@@ -59,7 +59,7 @@
     <img
       id="photo"
       src="./assets//raban-haaijk-wftNpcjCHT4-unsplash.jpg"
-      width="640"
+      width="320"
     />
 
     <div id="photoModal" class="modal">
@@ -79,9 +79,12 @@
         modalImg.src = this.src;
       };
 
-      modalImg.onclick = function () {
-        modal.style.display = "none";
-      };
+      document.body.addEventListener("keyup", function (event) {
+        if (event.keyCode === 27) {
+          event.preventDefault();
+          modal.style.display = "none";
+        }
+      });
     </script>
   </body>
 </html>
