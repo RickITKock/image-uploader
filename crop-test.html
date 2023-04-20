@@ -87,7 +87,7 @@
       const image = document.getElementById("photo");
       const cropper = new Cropper(image, {
         aspectRatio: 640 / 427,
-        cropBoxResizable: false,
+        cropBoxResizable: true,
         crop(event) {
           console.log(event.detail.x);
           console.log(event.detail.y);
