@@ -7,6 +7,10 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.css"
       rel="stylesheet"
     />
+    <script
+      src="https://kit.fontawesome.com/1e5467d09f.js"
+      crossorigin="anonymous"
+    ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.js"></script>
     <style>
       /* The Modal (background) */
@@ -67,6 +71,15 @@
         display: block;
         max-width: 100%;
       }
+
+      .ctrl-cropper {
+        padding: 12px 16px;
+        color: gray;
+      }
+
+      /* .ctrl-cropper i {
+        color: rgba(0, 0, 0, 0.9);
+      } */
     </style>
   </head>
   <body>
@@ -80,22 +93,41 @@
         />
       </div>
     </div>
+    <div class="ctrl-cropper" id="crop-indicator">
+      <i class="fa-solid fa-crop-simple"></i>
+      Crop
+    </div>
     <script type="text/javascript">
-      // import 'cropperjs/dist/cropper.css';
-      // import Cropper from "cropperjs";
-
       const image = document.getElementById("photo");
+      var cropButton = document.getElementById("crop-indicator");
+      const ESCAPE_KEY_CODE = 27;
+
       const cropper = new Cropper(image, {
         aspectRatio: 640 / 427,
         cropBoxResizable: true,
+        autoCrop: false,
         crop(event) {
-          console.log(event.detail.x);
-          console.log(event.detail.y);
-          console.log(event.detail.width);
-          console.log(event.detail.height);
-          console.log(event.detail.rotate);
-          console.log(event.detail.scaleX);
-          console.log(event.detail.scaleY);
+          if (event.detail.width > 0) {
+            cropButton.style.color = "black";
+          }
+          if (event.detail.width == 0) {
+            cropButton.style.color = "gray";
+          }
+        },
+
+        ready() {
+          cropButton.onclick = function (e) {
+            e.preventDefault();
+            console.log(cropper.viewBox.clientWidth);
+            cropper.clear();
+          };
+
+          document.body.addEventListener("keyup", function (event) {
+            if (event.keyCode === ESCAPE_KEY_CODE) {
+              event.preventDefault();
+              cropper.clear();
+            }
+          });
         },
       });
     </script>
