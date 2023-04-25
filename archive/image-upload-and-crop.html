@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://kit.fontawesome.com/1e5467d09f.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.js"></script>
+    <style>
+      .image-container {
+        width: 320px;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      .ctrl-cropper {
+        padding: 12px 16px;
+        color: gray;
+      }
+
+      /* .ctrl-cropper i {
+        color: rgba(0, 0, 0, 0.9);
+      } */
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- <div class="image-container"> -->
+      <!-- <img
+          id="photo"
+          src="../assets//raban-haaijk-wftNpcjCHT4-unsplash.jpg"
+          alt="photo"
+          width="640"
+        /> -->
+
+      <div class="image-container">
+        <div class="image-workspace">
+          <img src="" alt="" />
+          <span>Image Work Space</span>
+        </div>
+      </div>
+      <!-- </div> -->
+    </div>
+
+    <div class="action-button">
+      <button class="upload">Upload</button>
+      <input
+        type="file"
+        class="hidden-upload"
+        style="display: none"
+        accept="image/*"
+      />
+      <button class="download">Download</button>
+    </div>
+    <!-- <div class="ctrl-cropper" id="crop-indicator">
+      <i class="fa-solid fa-crop-simple"></i>
+      Crop
+    </div> -->
+    <script type="text/javascript">
+      //const image = document.getElementById("photo");
+      // var cropButton = document.getElementById("crop-indicator");
+
+      var actionButton = document.querySelectorAll(".action-button button");
+      var hiddenUpload = document.querySelector(
+        ".action-button .hidden-upload"
+      );
+
+      actionButton[0].onclick = () => hiddenUpload.click();
+      // actionButton[0].onclick = () => alert("Upload");
+
+      hiddenUpload.onchange = () => {
+        const ESCAPE_KEY_CODE = 27;
+
+        document.querySelector(
+          ".image-workspace"
+        ).innerHTML = `<img src="" alt="">`;
+        var image_workspace = document.querySelector(".image-workspace img");
+
+        var file = hiddenUpload.files[0];
+        var url = window.URL.createObjectURL(
+          new Blob([file], { type: "image/jpg" })
+        );
+        image_workspace.src = url;
+        // image_workspaceSpan.style.display = "none";
+
+        const options = {
+          aspectRatio: 640 / 427,
+          cropBoxResizable: true,
+          autoCrop: true,
+          crop(event) {
+            // if (event.detail.width > 0) {
+            //   cropButton.style.color = "black";
+            // }
+            // if (event.detail.width == 0) {
+            //   cropButton.style.color = "gray";
+            // }
+          },
+
+          ready() {
+            // cropButton.onclick = function (e) {
+            //   e.preventDefault();
+            //   console.log(cropper.viewBox.clientWidth);
+            //   cropper.clear();
+            // };
+
+            document.body.addEventListener("keyup", function (event) {
+              if (event.keyCode === ESCAPE_KEY_CODE) {
+                event.preventDefault();
+                cropper.clear();
+              }
+            });
+
+            actionButton[1].onclick = () => {
+              actionButton[1].innerText = "...";
+              cropper.getCroppedCanvas().toBlob((blob) => {
+                var downloadUrl = window.URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = downloadUrl;
+                a.download = "cropped-image.jpg"; // output image name
+                a.click();
+                actionButton[1].innerText = "Download";
+              });
+            };
+          },
+        };
+        var cropper = new Cropper(image_workspace, options);
+        console.log(cropper);
+      };
+    </script>
+  </body>
+</html>
