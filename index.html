@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -11,63 +10,52 @@
       crossorigin="anonymous"
     />
     <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://kit.fontawesome.com/1e5467d09f.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.js"></script>
+    <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
     />
-    <!-- Google Font -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
-      rel="stylesheet"
-    />
     <style>
-      * {
-        padding: 0;
-        margin: 0;
-        box-sizing: border-box;
-        font-family: "Poppins", sans-serif;
+      .image-container {
+        width: 100%;
       }
-      input[type="file"] {
-        display: none;
-      }
-      label {
+
+      img {
         display: block;
+        max-width: 100%;
+      }
+
+      .ctrl-cropper {
+        padding: 12px 16px;
+        color: gray;
+      }
+
+      input[type="file"] {
+        border: 3px dashed #999;
+        padding: 140px 50px 10px 50px;
+        cursor: move;
         position: relative;
-        background-color: #025bee;
-        color: #ffffff;
-        font-size: 1.1em;
+      }
+      input[type="file"]:before {
+        content: "drag & drop your files here";
+        display: block;
+        position: absolute;
         text-align: center;
-        width: 16em;
-        padding: 1em 0;
-        border-radius: 0.3em;
-        margin: 0 auto 1em auto;
-        cursor: pointer;
-      }
-      #image-display {
-        position: relative;
-        width: 90%;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-evenly;
-        gap: 1.25em;
-        flex-wrap: wrap;
-      }
-      #image-display figure {
-        width: 100%;
-      }
-      #image-display img {
-        width: 100%;
-      }
-      #image-display figcaption {
-        font-size: 0.8em;
-        text-align: center;
-        color: #5a5861;
-      }
-      .active {
-        border: 0.2em dashed #025bee;
-      }
-      #error {
-        text-align: center;
-        color: #ff3030;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 40px;
+        margin: -25px 0 0 -100px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #999;
       }
     </style>
   </head>
@@ -92,7 +80,7 @@
     >
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header border-0">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
               Upload Photo
             </h1>
@@ -105,20 +93,43 @@
           </div>
           <div class="modal-body">
             <!-- TODO: Add a box where user can upload an image -->
-            <div class="container">
-              <input type="file" id="upload-button" multiple accept="image/*" />
-              <label for="upload-button"
-                ><i class="fa-solid fa-upload"></i>&nbsp; Choose Or Drop Photos
-              </label>
-              <div id="error"></div>
-              <div id="image-display"></div>
+            <div class="image-container px-2">
+              <div class="image-workspace">
+                <img src="" alt="" />
+                <!-- <span>Image Work Space</span> -->
+              </div>
+            </div>
+
+            <div class="action-button">
+              <!-- <button class="upload">Upload</button> -->
+              <input
+                type="file"
+                accept="image/*"
+                class="hidden-upload"
+                id="photo-upload-input"
+              />
+              <!-- <button class="download">Download</button> -->
             </div>
           </div>
 
           <!-- TODO: disable the upload button -->
           <!-- TODO: Add an upload button -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" disabled>
+          <div class="modal-footer border-0">
+            <button
+              type="button"
+              class="btn btn-outline-primary border-0"
+              id="change-button"
+              style="display: none"
+              onclick="reset()"
+            >
+              Change
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="upload-button"
+              disabled
+            >
               Upload
             </button>
           </div>
@@ -126,132 +137,100 @@
       </div>
     </div>
 
-    <!-- TODO: Make the crop appear on image once uploaded -->
-    <!-- TODO: Upload the image -->
-    <!-- TODO: Display the image with the logo overlay -->
-    <!-- TODO: Open photo preview on image click -->
-
-    <!-- Cropper -->
+    <!-- <div class="ctrl-cropper" id="crop-indicator">
+      <i class="fa-solid fa-crop-simple"></i>
+      Crop
+    </div> -->
     <script type="text/javascript">
-      const image = document.getElementById("photo");
+      //const image = document.getElementById("photo");
       // var cropButton = document.getElementById("crop-indicator");
-      const ESCAPE_KEY_CODE = 27;
 
-      const cropper = new Cropper(image, {
-        aspectRatio: 640 / 427,
-        cropBoxResizable: true,
-        autoCrop: false,
-        crop(event) {
-          if (event.detail.width > 0) {
-            cropButton.style.color = "black";
-          }
-          if (event.detail.width == 0) {
-            cropButton.style.color = "gray";
-          }
-        },
+      const uploadButton = document.getElementById("upload-button");
+      const cancelUploadButton = document.getElementById("change-button");
 
-        ready() {
-          //   cropButton.onclick = function (e) {
-          //     e.preventDefault();
-          //     console.log(cropper.viewBox.clientWidth);
-          //     cropper.clear();
-          //   };
+      var actionButton = document.querySelectorAll(".action-button button");
+      var hiddenUpload = document.querySelector(
+        ".action-button .hidden-upload"
+      );
 
-          document.body.addEventListener("keyup", function (event) {
-            if (event.keyCode === ESCAPE_KEY_CODE) {
-              event.preventDefault();
-              cropper.clear();
-            }
-          });
-        },
+      function reset() {
+        cancelUploadButton.style.display = "none";
+        hiddenUpload.style = "display: block";
+        hiddenUpload.value = "";
+        document.querySelector(
+          ".image-workspace"
+        ).innerHTML = `<img src="" alt="">`;
+        uploadButton.disabled = true;
+      }
+
+      // var firstModal = new bootstrap.Modal(
+      //   document.getElementById("exampleModal")
+      // );
+
+      // console.log(firstModal);
+
+      const myModal = document.querySelector("#exampleModal");
+
+      myModal.addEventListener("hide.bs.modal", (event) => {
+        // hiddenUpload.style = "display: block";
+        // hiddenUpload.value = "";
+        reset();
       });
-    </script>
 
-    <script>
-      let uploadButton = document.getElementById("upload-button");
-      let chosenImage = document.getElementById("chosen-image");
-      let fileName = document.getElementById("file-name");
-      let container = document.querySelector(".container");
-      let error = document.getElementById("error");
-      let imageDisplay = document.getElementById("image-display");
+      // actionButton[0].onclick = () => hiddenUpload.click();
+      // actionButton[0].onclick = () => alert("Upload");
 
-      const fileHandler = (file, name, type) => {
-        if (type.split("/")[0] !== "image") {
-          //File Type Error
-          error.innerText = "Please upload an image file";
-          return false;
-        }
-        error.innerText = "";
-        let reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = () => {
-          //image and file name
-          let imageContainer = document.createElement("figure");
-          let img = document.createElement("img");
-          img.src = reader.result;
-          img.id = "photo";
-          imageContainer.appendChild(img);
-          imageContainer.innerHTML += `<figcaption>${name}</figcaption>`;
-          imageDisplay.appendChild(imageContainer);
+      hiddenUpload.onchange = () => {
+        hiddenUpload.style = "display: none";
+
+        const ESCAPE_KEY_CODE = 27;
+
+        document.querySelector(
+          ".image-workspace"
+        ).innerHTML = `<img src="" alt="">`;
+        var image_workspace = document.querySelector(".image-workspace img");
+
+        var file = hiddenUpload.files[0];
+        var url = window.URL.createObjectURL(
+          new Blob([file], { type: "image/jpg" })
+        );
+        image_workspace.src = url;
+        // image_workspaceSpan.style.display = "none";
+
+        const options = {
+          aspectRatio: 640 / 427,
+          cropBoxResizable: true,
+          autoCrop: true,
+          crop(event) {},
+
+          ready() {
+            cancelUploadButton.style.display = "block";
+            uploadButton.disabled = false;
+
+            // document.body.addEventListener("keyup", function (event) {
+            //   if (event.keyCode === ESCAPE_KEY_CODE) {
+            //     event.preventDefault();
+            //     cropper.reset();
+
+            //     // TODO: Make sure that everything here will reset
+            //   }
+            // });
+
+            // actionButton[1].onclick = () => {
+            //   actionButton[1].innerText = "...";
+            //   cropper.getCroppedCanvas().toBlob((blob) => {
+            //     var downloadUrl = window.URL.createObjectURL(blob);
+            //     console.log(downloadUrl);
+            //     var a = document.createElement("a");
+            //     a.href = downloadUrl;
+            //     a.download = "cropped-image.jpg"; // output image name
+            //     a.click();
+            //     actionButton[1].innerText = "Download";
+            //   });
+            // };
+          },
         };
-      };
-
-      //Upload Button
-      uploadButton.addEventListener("change", () => {
-        imageDisplay.innerHTML = "";
-        Array.from(uploadButton.files).forEach((file) => {
-          fileHandler(file, file.name, file.type);
-        });
-      });
-
-      container.addEventListener(
-        "dragenter",
-        (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          container.classList.add("active");
-        },
-        false
-      );
-
-      container.addEventListener(
-        "dragleave",
-        (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          container.classList.remove("active");
-        },
-        false
-      );
-
-      container.addEventListener(
-        "dragover",
-        (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          container.classList.add("active");
-        },
-        false
-      );
-
-      container.addEventListener(
-        "drop",
-        (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          container.classList.remove("active");
-          let draggedData = e.dataTransfer;
-          let files = draggedData.files;
-          imageDisplay.innerHTML = "";
-          Array.from(files).forEach((file) => {
-            fileHandler(file, file.name, file.type);
-          });
-        },
-        false
-      );
-
-      window.onload = () => {
-        error.innerText = "";
+        var cropper = new Cropper(image_workspace, options);
       };
     </script>
     <script
